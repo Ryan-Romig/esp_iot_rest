@@ -11,7 +11,7 @@ wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 [ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh"  && \
 [ -s "/root/.nvm/bash_completion" ] && \. "/root/.nvm/bash_completion" && \
 nvm install 18
-COPY * /firmware/
+COPY . /firmware/
 WORKDIR /firmware
 CMD ["/bin/bash", "-c", "export IDF_PATH=/Sdk/esp/esp-idf && . /Sdk/esp/esp-idf/export.sh && /bin/bash"]
 
