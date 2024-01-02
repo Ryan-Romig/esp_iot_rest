@@ -1,16 +1,52 @@
 # ESP32 IOT device example
 
-## this example uses ESP IDF framework 
-## must have 4mb flash and 4mb ram. WROOM work and can be purchased for $5 to $10. like ESP-CAM or ESP-DEVKIT
+## build with docker
+[Install Docker](https://docs.docker.com/desktop/install/windows-install/)
+
+## this example uses ESP IDF framework
 ### features:
-* mDNS broadcas
+* mDNS broadcast
 * Rest Server back end
 * React Front End
 * read/write configuration to local NVS storage
-* both AP mode and STA mode 
-    
+* wifi STA and AP mode switching without reboot
+
+## Wifi Retry
+on start, device will try to read the wifi username and password from memory and connect to the wifi. 
+it will retry 10 times and then start AP mode, which will broadcast a wifi network that you connect to .
+navigate to the ip address http://192.168.4.1 (or mDNS name) in a web browser to set the wifi credentials. 
+once you hit submit, the device will then try to connect to the network. It does not fully reboot but rather just switch wifi modes. 
+
+## Adding usefull commands
 use ``` idf.py create-component components/${COMPONENT_NAME} to create a new component``` 
 (replace ${COMPONENT_NAME} with the name of component folder)
+
+add ``` PRIV_REQUIRE ${COMPONENT_NAME}``` to the CMakeLists.txt to allow use of other components inside a component
+```cmake
+idf_component_register(SRCS "rest-server.c"
+                    INCLUDE_DIRS "include"
+                    REQUIRES json esp_http_server spiffs
+                    PRIV_REQUIRES config-manager wifi-driver ${COMPONENT_NAME})
+
+```
+
+in your newly created component, define the functions you want to use from the .c file
+then create the function in the .c file
+now if you added your component to the rest-server.c CMakeLists.txt PRIV_REQUIRES then you can access the commands defined in your new component .h file by using #include in the rest-server.c file. 
+
+## Project Name
+Project name is esp-iot. this is defined in the main/CMakeLists.txt file. 
+if you change this name, it will change the output binary file name, so make sure you adjust any flashing scripts you may have as well. 
+
+## set AP credentials
+set the AP (hotspot) SSID and Password in wifi-driver.c.
+set the mDNS name to whatever you like. 
+This name will allow you to access the front end website without using the ip address, but a name instead
+example:
+if i set mDNS name to 'device', i can access the website by going to 'device.local' in my web browser. 
+or 'pet-feeder' as the mDNS name would be pet-feeder.local or http://pet-feeder.local 
+
+
 
 
 add ``` PRIV_REQUIRE ${COMPONENT_NAME}``` to the CMakeLists.txt to allow use of other components inside a component
