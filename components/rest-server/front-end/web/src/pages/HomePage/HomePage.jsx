@@ -22,7 +22,7 @@ function HomePage() {
     const fetchData = () => {
         fetch('api/get')
         .then(response => response.json())
-        .then(data => setData(data.time))
+        .then(data => setData(data.wifi_ssid))
         .catch((error) => {
             console.error('Error:', error);
         });

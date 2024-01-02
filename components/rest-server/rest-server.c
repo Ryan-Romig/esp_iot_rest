@@ -134,7 +134,6 @@ static esp_err_t default_get_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-/* Simple handler for light brightness control */
 static esp_err_t post_handler(httpd_req_t* req)
 {
     int total_len = req->content_len;
@@ -180,7 +179,6 @@ static esp_err_t post_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-/* Simple handler for getting system handler */
 static esp_err_t get_handler(httpd_req_t* req)
 {
     httpd_resp_set_type(req, "application/json");
@@ -210,16 +208,13 @@ esp_err_t start_rest_server(const char* base_path)
     ESP_LOGI(TAG, "Starting HTTP Server");
     REST_CHECK(httpd_start(&server, &config) == ESP_OK, "Start server failed", err_start);
 
-    /* URI handler for fetching system info */
     httpd_uri_t get_uri = { .uri = "/api/get", .method = HTTP_GET, .handler = get_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &get_uri);
 
-    /* URI handler for light brightness control */
     httpd_uri_t post_uri
         = { .uri = "/api/post", .method = HTTP_POST, .handler = post_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &post_uri);
-
-    /* URI handler for getting web server files */
+//handler for all other requests (including front end files)
     httpd_uri_t default_get_uri
         = { .uri = "/*", .method = HTTP_GET, .handler = default_get_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &default_get_uri);
