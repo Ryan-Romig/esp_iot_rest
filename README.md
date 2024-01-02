@@ -1,5 +1,6 @@
 # ESP32 IOT device example
 
+## Building
 ## build with docker
 [Install Docker](https://docs.docker.com/desktop/install/windows-install/)
 
