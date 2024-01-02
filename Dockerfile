@@ -7,10 +7,10 @@ cd /Sdk/esp/esp-idf &&  chmod +x install.sh && chmod +x export.sh && \
 ./install.sh esp32 && \
 mkdir -p /firmware && \
 # git clone https://github.com/Ryan-Romig/esp_iot_rest.git /firmware && \
-wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-RUN [ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh"  && \
-[ -s "/root/.nvm/bash_completion" ] && \. "/root/.nvm/bash_completion"  && \
-nvm install 18
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
+[ -s "/root/.nvm/nvm.sh" ] && \. "/root/.nvm/nvm.sh"  && \
+[ -s "/root/.nvm/bash_completion" ] && \. "/root/.nvm/bash_completion"
+RUN nvm install 18
 COPY * /firmware/
 WORKDIR /firmware
 CMD ["/bin/bash", "-c", "export IDF_PATH=/Sdk/esp/esp-idf && . /Sdk/esp/esp-idf/export.sh && /bin/bash"]
