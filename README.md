@@ -1,6 +1,7 @@
 # ESP32 IOT device example
 
 ## this example uses ESP IDF framework 
+## must have 4mb flash and 4mb ram. WROOM work and can be purchased for $5 to $10. like ESP-CAM or ESP-DEVKIT
 ### features:
 * mDNS broadcas
 * Rest Server back end
