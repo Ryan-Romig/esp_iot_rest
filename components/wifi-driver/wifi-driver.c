@@ -43,9 +43,8 @@ static EventGroupHandle_t s_wifi_event_group;
 
 static int s_retry_num = 0;
 
-#define MDNS_HOST_NAME "PLAYER"
-
-#define MDNS_INSTANCE "ESP_MDNS"
+#define MDNS_HOST_NAME "ESP"
+#define MDNS_INSTANCE "ESP IOT REST SERVER"
 
 esp_err_t start_rest_server(const char* base_path);
 
