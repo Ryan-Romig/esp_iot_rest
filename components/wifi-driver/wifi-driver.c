@@ -11,6 +11,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "nvs_flash.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../../main/Global.h"
@@ -46,8 +48,6 @@ static int s_retry_num = 0;
 #define MDNS_HOST_NAME "ESP"
 #define MDNS_INSTANCE "ESP IOT REST SERVER"
 
-esp_err_t start_rest_server(const char* base_path);
-
 static void init_mdns(void)
 {
     mdns_init();
@@ -66,7 +66,10 @@ static void init_mdns(void)
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
+        // check if wifi mode is APSTA
+        if (isApMode != true) {
+            esp_wifi_connect();
+        }
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         if (s_retry_num < WIFI_MAX_RETRY) {
             esp_wifi_connect();
@@ -97,7 +100,7 @@ void init_sta_mode()
 {
     ESP_LOGI(TAG, "starting station mode");
 
-    if (firstRun > 0) {
+    if (firstRun > 0 && isApMode == true) {
         ESP_ERROR_CHECK(esp_wifi_stop());
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL));
     }
@@ -109,7 +112,6 @@ void init_sta_mode()
         init_ap_mode();
         return;
     }
-
     wifi_config_t wifi_config = {
     .sta = {
         .threshold.authmode = WIFI_AUTH_WPA2_PSK,
@@ -124,6 +126,7 @@ void init_sta_mode()
     strncpy((char*)wifi_config.sta.ssid, ssid_ptr, sizeof(wifi_config.sta.ssid));
     strncpy((char*)wifi_config.sta.password, password_ptr, sizeof(wifi_config.sta.password));
 
+    isApMode = false;
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -178,6 +181,35 @@ void print_ip()
         break;
     }
 }
+
+#define MAX_SSID_COUNT 10
+
+wifi_ap_record_t* scan_wifi_networks()
+{
+    // Configure and start the scan
+    wifi_scan_config_t scan_config = { .show_hidden = false };
+    esp_err_t ret = esp_wifi_scan_start(&scan_config, true);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "esp_wifi_scan_start failed: %s", esp_err_to_name(ret));
+        return NULL;
+    }
+
+    uint16_t ap_count = 0;
+    esp_wifi_scan_get_ap_num(&ap_count);
+
+    wifi_ap_record_t* ap_records = (wifi_ap_record_t*)malloc(ap_count * sizeof(wifi_ap_record_t));
+    if (ap_records == NULL) {
+        ESP_LOGE(TAG, "Failed to allocate memory for AP records");
+        return NULL;
+    }
+
+    ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&ap_count, ap_records));
+
+    ESP_LOGI(TAG, "Found %d access points:", ap_count);
+    ESP_LOGI(TAG, "scan complete");
+    return ap_records;
+}
+
 void init_ap_mode()
 {
     ESP_LOGI(TAG, "starting AP mode");
@@ -199,9 +231,10 @@ void init_ap_mode()
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    // ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    isApMode = true;
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-    isApMode = true;
     ESP_LOGI(TAG, " AP mode started");
 }

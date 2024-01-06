@@ -1,19 +1,15 @@
 #include "../../components/config-manager/include/config-manager.h"
 #include "../../components/wifi-driver/include/wifi-driver.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_netif.h"
-#include "sdkconfig.h"
-#include <string.h>
-#include "esp_log.h"
-#include "esp_spiffs.h"
-#include "lwip/apps/netbiosns.h"
-#include "esp_spiffs.h"
 #include "cJSON.h"
+#include "esp_event.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
+#include "esp_netif.h"
+#include "esp_spiffs.h"
 #include "esp_system.h"
 #include "esp_vfs.h"
+#include "lwip/apps/netbiosns.h"
+#include "sdkconfig.h"
 #include <fcntl.h>
 #include <string.h>
 static const char* TAG = "REST SERVER";
@@ -88,7 +84,6 @@ static esp_err_t set_content_type_from_file(httpd_req_t* req, const char* filepa
 static esp_err_t default_get_handler(httpd_req_t* req)
 {
     char filepath[FILE_PATH_MAX];
-
     rest_server_context_t* rest_context = (rest_server_context_t*)req->user_ctx;
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
     if (req->uri[strlen(req->uri) - 1] == '/') {
@@ -133,7 +128,6 @@ static esp_err_t default_get_handler(httpd_req_t* req)
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
-
 static esp_err_t post_handler(httpd_req_t* req)
 {
     int total_len = req->content_len;
@@ -167,14 +161,14 @@ static esp_err_t post_handler(httpd_req_t* req)
 
         if (strcmp(key, "wifi_ssid") == 0 || strcmp(key, "wifi_password") == 0) {
             NVS_Write_String("WIFI", key, value);
-            printf('got wifi config');  
+            ESP_LOGI(TAG, "WIFI: %s", value);
+            NVS_Write_String("config", key, value);
+            printf("Value: %s\n", value);
+            printf("Key: %s\n", key);
         }
-        NVS_Write_String("config", key, value);
-        printf("Value: %s\n", value);
-        printf("Key: %s\n", key);
     }
     cJSON_Delete(root);
-    httpd_resp_sendstr(req, "Post control value successfully");
+    httpd_resp_sendstr(req, "sucess");
     init_sta_mode();
     return ESP_OK;
 }
@@ -191,7 +185,26 @@ static esp_err_t get_handler(httpd_req_t* req)
     cJSON_Delete(root);
     return ESP_OK;
 }
-
+esp_err_t get_available_wifi_handler(httpd_req_t* req)
+{
+    httpd_resp_set_type(req, "application/json");
+    wifi_ap_record_t* wifi_networks = scan_wifi_networks();
+    int size = 10;
+    cJSON* root = cJSON_CreateObject();
+    cJSON* wifi_networks_json = cJSON_CreateArray();
+    for (int i = 0; i < size; i++) {
+        if(wifi_networks[i].ssid == NULL) break;
+        ESP_LOGI(TAG, "WIFI: %s", (char *)wifi_networks[i].ssid);
+        cJSON* jsonString = cJSON_CreateString((char *)wifi_networks[i].ssid);
+        cJSON_AddItemToArray(wifi_networks_json, jsonString);
+    }
+    cJSON_AddItemToObject(root, "wifi_networks", wifi_networks_json);
+    // cJSON_AddItemToObject(root, "wifi_networks", cJSON_CreateStringArray(wifi_networks, size));
+    char* sys_info = cJSON_Print(root);
+    httpd_resp_sendstr(req, sys_info);
+    cJSON_Delete(root);
+    return ESP_OK;
+}
 esp_err_t start_rest_server(const char* base_path);
 
 esp_err_t start_rest_server(const char* base_path)
@@ -211,10 +224,15 @@ esp_err_t start_rest_server(const char* base_path)
     httpd_uri_t get_uri = { .uri = "/api/get", .method = HTTP_GET, .handler = get_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &get_uri);
 
+    httpd_uri_t get_wifi_uri = {
+        .uri = "/api/wifi/scan", .method = HTTP_GET, .handler = get_available_wifi_handler, .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &get_wifi_uri);
+
     httpd_uri_t post_uri
         = { .uri = "/api/post", .method = HTTP_POST, .handler = post_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &post_uri);
-//handler for all other requests (including front end files)
+    // handler for all other requests (including front end files)
     httpd_uri_t default_get_uri
         = { .uri = "/*", .method = HTTP_GET, .handler = default_get_handler, .user_ctx = rest_context };
     httpd_register_uri_handler(server, &default_get_uri);

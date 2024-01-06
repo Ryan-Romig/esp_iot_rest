@@ -26,8 +26,13 @@ void NVS_Write_String(const char* name, const char* key, const char* stringVal)
 {
     nvs_handle_t nvsHandle;
     esp_err_t retVal;
-
+    
     retVal = nvs_open(name, NVS_READWRITE, &nvsHandle);
+    if (stringVal[0] == '\0') {
+        nvs_erase_key(nvsHandle, key);
+        nvs_commit(nvsHandle);
+        return;
+    }
     if (retVal != ESP_OK) {
         ESP_LOGE("NVS", "Error (%s) opening NVS handle for Write", esp_err_to_name(retVal));
     } else {

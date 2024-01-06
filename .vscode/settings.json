@@ -1,7 +1,7 @@
 {
     "idf.adapterTargetName": "esp32",
     "C_Cpp.errorSquiggles": "enabled",
-    "C_Cpp.intelliSenseEngine": "Tag Parser",
+    "C_Cpp.intelliSenseEngine": "default",
     "files.associations": {
         "captive-portal.h": "c",
         "sockets.h": "c",
@@ -19,6 +19,10 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "config-manager.h": "c"
+        "config-manager.h": "c",
+        "*.inc": "c",
+        "global.h": "c",
+        "string.h": "c",
+        "string_view": "c"
     }
 }
