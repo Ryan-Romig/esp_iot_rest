@@ -8,6 +8,7 @@ function App() {
   <Routes>
     <Route exact path="/" element={<HomePage/>} />
     <Route path="/wifi" element={<ConfigureWifiPage/>} />
+    <Route path="*" element={<h1>Not Found</h1>} />
   </Routes>
 </Router>
   )
