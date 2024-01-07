@@ -83,11 +83,11 @@ char* NVS_Read_String(const char* name, const char* key)
                     ESP_LOGE("NVS", "Error (%s) Can not read/get value: %s", esp_err_to_name(retVal), data);
                 }
             }
-        }
 
         retVal = nvs_commit(nvsHandle);
         if (retVal != ESP_OK) {
             ESP_LOGE("NVS", "Error (%s) Can not commit - read", esp_err_to_name(retVal));
+        }
         }
     }
 

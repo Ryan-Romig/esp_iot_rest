@@ -83,13 +83,18 @@ static esp_err_t set_content_type_from_file(httpd_req_t* req, const char* filepa
 /* Send HTTP response with the contents of the requested file */
 static esp_err_t default_get_handler(httpd_req_t* req)
 {
-    char filepath[FILE_PATH_MAX];
+     char filepath[FILE_PATH_MAX];
     rest_server_context_t* rest_context = (rest_server_context_t*)req->user_ctx;
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
-    if (req->uri[strlen(req->uri) - 1] == '/') {
+    
+    strlcat(filepath, req->uri, sizeof(filepath));
+
+    // Check if the file exists
+    struct stat file_stat;
+    if (stat(filepath, &file_stat) == -1 || S_ISDIR(file_stat.st_mode)) {
+        // If the file doesn't exist or the path is a directory, serve index.html
+        strlcpy(filepath, rest_context->base_path, sizeof(filepath));
         strlcat(filepath, "/index.html", sizeof(filepath));
-    } else {
-        strlcat(filepath, req->uri, sizeof(filepath));
     }
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {

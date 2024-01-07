@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {useNavigate} from 'react-router-dom'    
+import { useNavigate } from 'react-router-dom'
 const ConfigureWifiForm = () => {
     const navigate = useNavigate()
     const [availableWifiNetworks, setAvailableWifiNetworks] = useState([])
@@ -17,7 +17,7 @@ const ConfigureWifiForm = () => {
             //then we can assume the request was successful and we can get the data from the response
             const data = await response.json()// .json() is a built in function of the reponse object 
             //finally set the react hook variable to the data we got from the server
-            console.log(data,response)
+            console.log(data, response)
             setAvailableWifiNetworks(data.wifi_networks)
         } catch (error) {
             console.log(error)
@@ -55,7 +55,7 @@ const ConfigureWifiForm = () => {
         })
         e.target.reset()
         navigate('/')
-         
+
 
     }
 
@@ -77,7 +77,7 @@ const ConfigureWifiForm = () => {
         const selectedValue = e.target.innerHTML
         setSSID(selectedValue)
     }
-    const itemStyle =  (itemName) => {
+    const itemStyle = (itemName) => {
         return {
             backgroundColor: ssid === itemName ? "blue" : "white",
             color: ssid === itemName ? "white" : "black",
@@ -87,11 +87,26 @@ const ConfigureWifiForm = () => {
 
 
     }
-    //return the jsx to render. this is basically HTML but with some extra features
+    const handleResetWifiClick = async () => {
+        fetch('api/post', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({wifi_ssid:'', wifi_password:''}), // replace with your actual data
+        })
+        e.target.reset()
+        navigate('/')
 
-    //form object with input inside. anything you put type=submit inside a form will submit the form when clicked. 
-    //whatever you put in the return statement has to be html or text. If it's a variable it has to a string variable(or converted to string)
-    return (
+
+    }
+//return the jsx to render. this is basically HTML but with some extra features
+
+//form object with input inside. anything you put type=submit inside a form will submit the form when clicked. 
+//whatever you put in the return statement has to be html or text. If it's a variable it has to a string variable(or converted to string)
+return (
+    <>
+        <button onClick={handleResetWifiClick}>Reset Wifi</button>
         <form style={style} onSubmit={handleFormSubmit}>
             <h1>Configure Wifi</h1>
             <label>Wifi SSID</label>
@@ -100,12 +115,13 @@ const ConfigureWifiForm = () => {
                 {availableWifiNetworks?.length > 0 ? availableWifiNetworks.map((network) => {
                     return <li style={itemStyle(network)} onClick={handleSelectSSID} key={network}>{network}</li>
                 }) : "No networks found"}
-                </ul>
+            </ul>
             <label>Wifi Password</label>
-            <input type='password' name="wifi_password"></input>
+            <input type='password' name="wifi_password" required></input>
             <button type="submit">Submit</button>
         </form>
-    );
+    </>
+);
 }
 
 export default ConfigureWifiForm;
