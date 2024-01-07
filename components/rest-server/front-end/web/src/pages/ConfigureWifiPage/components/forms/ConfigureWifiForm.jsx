@@ -95,7 +95,6 @@ const ConfigureWifiForm = () => {
             },
             body: JSON.stringify({wifi_ssid:'', wifi_password:''}), // replace with your actual data
         })
-        e.target.reset()
         navigate('/')
 
 
