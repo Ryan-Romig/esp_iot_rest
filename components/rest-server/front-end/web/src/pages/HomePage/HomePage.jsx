@@ -1,4 +1,5 @@
 import { NavLink as Link } from "react-router-dom";
+import TimeCard from "../../components/cards/TimeCard";
 function HomePage() {
 const style = {
         display: 'flex',
@@ -9,6 +10,7 @@ const style = {
     return (
         <div style={style}>
             <Link to="/wifi">Configure Wifi</Link>
+            <TimeCard />
         </div>
     );
 }

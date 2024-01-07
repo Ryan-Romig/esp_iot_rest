@@ -23,6 +23,12 @@
         "*.inc": "c",
         "global.h": "c",
         "string.h": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "sntp.h": "c",
+        "motor-driver.h": "c",
+        "wifi-driver.h": "c",
+        "time-server.h": "c",
+        "time.h": "c",
+        "esp_log.h": "c"
     }
 }

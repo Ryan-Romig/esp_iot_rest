@@ -1,1 +1,2 @@
 int isWifiConnected;
+int isTimeUpdated;
