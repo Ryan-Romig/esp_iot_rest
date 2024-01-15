@@ -1,2 +1,0 @@
-int isWifiConnected;
-int isTimeUpdated;

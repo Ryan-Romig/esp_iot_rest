@@ -1,5 +1,4 @@
 #include "../../components/config-manager/include/config-manager.h"
-#include "../../components/time-server/include/time-server.h"
 #include "../../components/wifi-driver/include/wifi-driver.h"
 #include "cJSON.h"
 #include "esp_event.h"
@@ -200,7 +199,9 @@ esp_err_t get_available_wifi_handler(httpd_req_t* req)
     cJSON* root = cJSON_CreateObject();
     cJSON* wifi_networks_json = cJSON_CreateArray();
     for (int i = 0; i < size; i++) {
-        if (wifi_networks[i].ssid == NULL)
+        if (wifi_networks[i].ssid[0] == '\0') {
+            break;
+        }
             break;
         ESP_LOGI(TAG, "WIFI: %s", (char*)wifi_networks[i].ssid);
         cJSON* jsonString = cJSON_CreateString((char*)wifi_networks[i].ssid);
@@ -214,19 +215,19 @@ esp_err_t get_available_wifi_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-esp_err_t get_time_handler(httpd_req_t* req)
-{
-    httpd_resp_set_type(req, "application/json");
-    struct timeval currentTime = get_local_time();
-    time_t epochTime = get_epoch_time();
-    cJSON* root = cJSON_CreateObject();
-    cJSON* timeString = cJSON_CreateString(ctime(&currentTime.tv_sec));
-    cJSON_AddItemToObject(root, "time", timeString);
-    char* result = cJSON_Print(root);
-    httpd_resp_sendstr(req, result);
-    cJSON_Delete(root);
-    return ESP_OK;
-}
+// esp_err_t get_time_handler(httpd_req_t* req)
+// {
+//     httpd_resp_set_type(req, "application/json");
+//     struct timeval currentTime = get_local_time();
+//     time_t epochTime = get_epoch_time();
+//     cJSON* root = cJSON_CreateObject();
+//     cJSON* timeString = cJSON_CreateString(ctime(&currentTime.tv_sec));
+//     cJSON_AddItemToObject(root, "time", timeString);
+//     char* result = cJSON_Print(root);
+//     httpd_resp_sendstr(req, result);
+//     cJSON_Delete(root);
+//     return ESP_OK;
+// }
 
 esp_err_t start_rest_server(const char* base_path);
 
@@ -251,9 +252,9 @@ esp_err_t start_rest_server(const char* base_path)
         .uri = "/api/wifi/scan", .method = HTTP_GET, .handler = get_available_wifi_handler, .user_ctx = rest_context
     };
     httpd_register_uri_handler(server, &get_wifi_uri);
-    httpd_uri_t get_time_uri
-        = { .uri = "/api/time", .method = HTTP_GET, .handler = get_time_handler, .user_ctx = rest_context };
-    httpd_register_uri_handler(server, &get_time_uri);
+    // httpd_uri_t get_time_uri
+    //     = { .uri = "/api/time", .method = HTTP_GET, .handler = get_time_handler, .user_ctx = rest_context };
+    // httpd_register_uri_handler(server, &get_time_uri);
 
     httpd_uri_t post_uri
         = { .uri = "/api/post", .method = HTTP_POST, .handler = post_handler, .user_ctx = rest_context };

@@ -1,6 +1,5 @@
 #include "../components/config-manager/include/config-manager.h"
 #include "../components/rest-server/include/rest-server.h"
-#include "../components/time-server/include/time-server.h"
 #include "../components/wifi-driver/include/wifi-driver.h"
 #include "Global.h"
 #include "esp_log.h"
@@ -27,14 +26,4 @@ void app_main(void)
     init_wifi();
     init_sta_mode();
     start_wifi_server();
-    while (1) {
-        if (isWifiConnected
-            == 1) { // isWifiConnected is stored in the Global.h file. it can be accessed anywhere in the project
-            // code here to run when wifi is connected.
-            // will keep running until wifi is connected
-            start_time_server_task();
-            break;
-        }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
 }
