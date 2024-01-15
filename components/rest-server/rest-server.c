@@ -202,7 +202,6 @@ esp_err_t get_available_wifi_handler(httpd_req_t* req)
         if (wifi_networks[i].ssid[0] == '\0') {
             break;
         }
-            break;
         ESP_LOGI(TAG, "WIFI: %s", (char*)wifi_networks[i].ssid);
         cJSON* jsonString = cJSON_CreateString((char*)wifi_networks[i].ssid);
         cJSON_AddItemToArray(wifi_networks_json, jsonString);
