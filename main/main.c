@@ -1,6 +1,7 @@
 #include "../components/config-manager/include/config-manager.h"
 #include "../components/rest-server/include/rest-server.h"
 #include "../components/wifi-driver/include/wifi-driver.h"
+#include "../components/smart-home/include/smart-home-wrapper.h"
 #include "Global.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -26,4 +27,5 @@ void app_main(void)
     init_wifi();
     init_sta_mode();
     start_wifi_server();
+    init_smart_home();
 }
