@@ -50,17 +50,16 @@ static int s_retry_num = 0;
 
 static void init_mdns(void)
 {
-    mdns_init();
-    mdns_hostname_set(MDNS_HOST_NAME);
-    mdns_instance_name_set(MDNS_INSTANCE);
+   esp_err_t err = mdns_init();
+    if (err) {
+        printf("MDNS Init failed: %d\n", err);
+        return;
+    }
 
-    mdns_txt_item_t serviceTxtData[] = { { "board", "esp32" }, { "path", "/" } };
-
-    ESP_ERROR_CHECK(mdns_service_add(
-        "ESP32-WebServer", "_http", "_tcp", 80, serviceTxtData, sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
-
-    netbiosns_init();
-    netbiosns_set_name(MDNS_HOST_NAME);
+    //set hostname
+    mdns_hostname_set("ESP");
+    //set default instance
+    mdns_instance_name_set("ESP-FEEDER");
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
@@ -136,19 +135,27 @@ void init_wifi()
 {
     esp_event_handler_instance_t instance_any_id;
     esp_event_handler_instance_t instance_got_ip;
-    esp_log_level_set(TAG, ESP_LOG_DEBUG);
     ESP_ERROR_CHECK(esp_netif_init());
+    ESP_LOGE(TAG, "esp_netif_init");
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+    ESP_LOGE(TAG, "esp_loop_init");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    ESP_LOGE(TAG, "esp_wifi_init");
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_NULL));
+    ESP_LOGE(TAG, "esp_set mode_init");
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+    ESP_LOGE(TAG, "esp_reg8ist hendler_init");
     ESP_ERROR_CHECK(
         esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip));
+    ESP_LOGE(TAG, "esp_reg8ist hen_init");
 
     esp_netif_create_default_wifi_ap();
+    ESP_LOGE(TAG, "esp_AP");
     esp_netif_create_default_wifi_sta();
+    ESP_LOGE(TAG, "esp_STA");
     init_mdns();
+    ESP_LOGE(TAG, "esp_MDNS");
 }
 void print_ip()
 {

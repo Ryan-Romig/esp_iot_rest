@@ -24,8 +24,13 @@ void app_main(void)
     esp_log_level_set("*", ESP_LOG_DEBUG);
 
     init_nvs();
+    ESP_LOGE(TAG, "NVS INITIALIZED");
     init_wifi();
+    ESP_LOGE(TAG, "WIFI INITIALIZED");
     init_sta_mode();
+    ESP_LOGE(TAG, "STA INITIALIZED");
     start_wifi_server();
+    ESP_LOGE(TAG, "REST INITIALIZED");
     init_smart_home();
+    ESP_LOGE(TAG, "MATTER INITIALIZED");
 }
