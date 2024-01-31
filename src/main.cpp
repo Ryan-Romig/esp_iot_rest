@@ -9,9 +9,9 @@ HX711 scale; // we can call member functions of this object to interact with the
              // get the weight in grams)
 
 #define IR_SENSOR 13 // Define the IR sensor pin. This is connected to GPIO 13
-#define SENSOR_POWER_GPIO                                                                                              \
-    34 // Define the GPIO pin to provide power to the IR sensor. Setting this pin provide 3.3v at 40mA max and can be
-       // used for power
+#define SENSOR_POWER_GPIO 19 // Define the GPIO pin to provide power to \
+        the IR sensor. Setting this pin provide 3.3v at 40mA max and can be \
+        used for power
 
 // create function to setup the local cell (scale). run this in setup()
 void setup_scale()
@@ -25,13 +25,12 @@ void setup_scale()
 // create function to read the scale. run this in loop()
 void scale_loop()
 {
-    scale.power_up(); // power up the ADC (HX711) per the HX711 library documentation
-    Serial.print("one reading:\t");
-    double weight = scale.get_units(); // get the weight in grams
-    Serial.print(weight, 1); // get the weight in grams and print it to the serial monitor. the 1 indicates
-                                        // how many decimal places to print
-    scale.power_down(); // put the ADC (HX711) in sleep mode after we are done reading the weight. this saves power
-    delay(1000); // wait one second before taking another reading. this delay blocks the loop from running too fast
+        scale.power_up(); // power up the ADC (HX711) per the HX711 library documentation
+        Serial.print("scale reading:\t");
+        double weight = scale.get_units(); // get the weight in grams
+        Serial.println(weight, 1); // get the weight in grams and print it to the serial monitor. the 1 indicates
+                                 // how many decimal places to print
+        scale.power_down(); // put the ADC (HX711) in sleep mode after we are done reading the weight. this saves power
 }
 
 // create function to setup the IR sensor. run this in setup()
@@ -44,15 +43,16 @@ void setup_ir_sensor()
 // create function to read the IR sensor. run this in loop()
 void ir_sensor_loop()
 {
-    int sensorValue = digitalRead(IR_SENSOR); // Read the input from GPIO 13
-    Serial.println(sensorValue); // Print the value to the serial monitor
+        int sensorValue = digitalRead(IR_SENSOR);// 0 is on, 1 is off
+        Serial.print("IR Sensor"); // Read the input from GPIO 13
+        Serial.println(sensorValue); // Print the value to the serial monitor
 }
 
 // the setup function runs once when you press reset or power the board
 void setup()
 {
     Serial.begin(115200); // Start the serial monitor at 115200 baud for debugging
-    setup_ir_sensor();//run the ir sensor setup function 
+    setup_ir_sensor(); // run the ir sensor setup function
     setup_scale(); // run the scale setup function
 }
 // main code that runs over and over after the setup is complete
@@ -60,4 +60,5 @@ void loop()
 {
     scale_loop(); // run the scale loop function
     ir_sensor_loop(); // run the ir sensor loop function
+    delay(1000); // wait 1000ms before looping. delaying a 'restart'  just a hair helps stability slightly
 }
